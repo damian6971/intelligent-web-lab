@@ -16,6 +16,11 @@ def health():
 
 @app.route("/api/products")
 def products():
+    if "max_price" in request.args:
+        if not request.args["max_price"].isdigit():
+            return jsonify({"error": "Invalid price parameter"}), 400
+        filtered = [p for p in PRODUCTS if p["cena"] <= int(request.args["max_price"])]
+        return jsonify(filtered)
     return jsonify(PRODUCTS)
 
 @app.route("/api/products/<int:product_id>")
