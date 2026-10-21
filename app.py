@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
@@ -24,6 +24,12 @@ def product(product_id):
         if product["id"] == product_id:
             return jsonify(product)
     return jsonify({"error": "Product not found"}), 404
+
+@app.post("/api/products")
+def add_product():
+    product = request.get_json()
+    PRODUCTS.append(product)
+    return jsonify(product), 201
 
 if __name__ == "__main__":
     app.run(debug=True)
