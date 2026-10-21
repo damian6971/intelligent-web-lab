@@ -32,9 +32,28 @@ def product(product_id):
 
 @app.post("/api/products")
 def add_product():
-    product = request.get_json()
-    PRODUCTS.append(product)
-    return jsonify(product), 201
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict) or not {"nazwa", "kategoria", "cena", "opis"} <= data.keys():
+        return jsonify({"error": "Oczekiwano obiektu JSON z polami nazwa, kategoria, cena, opis."}), 400
+
+    if "id" in data:
+        return jsonify({"error": "Pole 'id' jest generowane automatycznie przez serwer."}), 400
+
+    if any(not isinstance(data[key], str) or not data[key].strip() for key in ("nazwa", "kategoria", "opis")):
+        return jsonify({"error": "Pola tekstowe muszą być niepustymi napisami."}), 400
+
+    price = data["cena"]
+    if type(price) not in (int, float) or price < 0 or price != price or price == float("inf"):
+        return jsonify({"error": "Pole 'cena' musi być skończoną liczbą nieujemną."}), 400
+
+    new_id = max((p["id"] for p in PRODUCTS), default=0) + 1
+    new_product = {key: data[key].strip() if isinstance(data[key], str) else data[key] for key in
+                   ("nazwa", "kategoria", "cena", "opis")}
+    new_product["id"] = new_id
+
+    PRODUCTS.append(new_product)
+    return jsonify(new_product), 201
 
 if __name__ == "__main__":
     app.run(debug=True)
