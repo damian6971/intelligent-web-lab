@@ -5,13 +5,16 @@ app = Flask(__name__)
 
 @app.route("/api/recommend")
 def api_recommend():
+    genre = request.args.get("genre", "").strip()
+    genre_filter = genre.lower() if genre else None
+
     title = request.args.get("title", "").strip()
     if not title:
         return jsonify({"error": "podaj parametr ?title=..."}), 400
     n = request.args.get("top_n", type=int) if "top_n" in request.args else 5
     if n is None or not 1 <= n <= 10:
         return jsonify({"error": "top_n musi byc z zakresu 1-10"}), 400
-    recs = recommend(title, top_n=n)
+    recs = recommend(title, top_n=n, genre_filter=genre_filter)
     if recs is None:
         return jsonify({"error": "nie znam takiego filmu"}), 404
     return jsonify({"ti`tle": title, "count": len(recs), "recommendations": recs})
