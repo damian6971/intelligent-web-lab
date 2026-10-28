@@ -1,11 +1,12 @@
+import os
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 
-df = pd.read_csv("ratings.csv")
+df = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "ratings.csv"))
 
 matrix = df.pivot_table(index="user", columns="title", values="rating")
 # 12 wierszy (osoby) x 24 kolumny (filmy), NaN = nieoceniony
-print(matrix.shape)  # (12, 24)
+# print(matrix.shape)  # (12, 24)
 
 means = matrix.mean(axis=1)                 # średnia każdej osoby
 centered = matrix.sub(means, axis=0).fillna(0)
